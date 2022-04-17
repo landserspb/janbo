@@ -1,0 +1,68 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: janbo-app
+spec:
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: janbo-app
+  template:
+    metadata:
+      labels:
+        app: janbo-app
+    spec:
+      containers:
+        - name: janbo-app
+          image: landserspb/janbo-test:latest
+          ports:
+            - containerPort: 11130
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 11130
+          resources:
+            limits:
+              cpu: 10m
+              memory: 30Mi
+            requests:
+              cpu: 10m
+              memory: 30Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: janbo-service
+spec:
+  selector:
+    app: janbo-app
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 11130
+  type: NodePort
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: janbo-ingress
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    cert-manager.io/cluster-issuer: letsencrypt
+spec:
+  rules:
+  - host: janbo.protsenko.su
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: janbo-service
+            port:
+              number: 80
+  tls:
+    - hosts:
+      - janbo.protsenko.su
+      secretName: janbo.protsenko.su

@@ -1,0 +1,18 @@
+- pipeline: "Build and push docker images"
+  on: "EVENT"
+  events:
+  - type: "PUSH"
+    refs:
+    - "refs/heads/master"
+  priority: "NORMAL"
+  fail_on_prepare_env_warning: true
+  actions:
+  - action: "Build Docker image"
+    type: "DOCKERFILE"
+    dockerfile_path: "Dockerfile"
+    target_platform: "linux/amd64"
+  - action: "Push Docker image"
+    type: "DOCKER_PUSH"
+    docker_image_tag: "latest"
+    repository: "landserspb/janbo-test"
+    integration_hash: "kyNzqmQO5xe7YzP1b7rJX0A4o8"
